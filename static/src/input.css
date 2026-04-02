@@ -1,0 +1,59 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    color-scheme: dark;
+  }
+
+  :root[data-theme='light'] {
+    color-scheme: light;
+  }
+
+  body {
+    @apply bg-surface text-on-surface font-body antialiased;
+  }
+
+  [data-theme='light'] body {
+    background: #eef6ff;
+    color: #10233b;
+  }
+}
+
+@layer components {
+  .glass-panel {
+    @apply border border-outline-variant/20 bg-surface-container-high/70 backdrop-blur-xl;
+  }
+
+  [data-theme='light'] .glass-panel {
+    background: rgba(255,255,255,0.78);
+    border-color: rgba(64,84,120,0.12);
+  }
+
+  .card-panel {
+    @apply rounded-2xl border border-outline-variant/15 bg-surface-container-low shadow-glow;
+  }
+
+  [data-theme='light'] .card-panel {
+    @apply bg-white;
+    border-color: rgba(64,84,120,0.12);
+    box-shadow: 0 12px 40px rgba(39, 61, 92, 0.08);
+  }
+
+  .status-healthy {
+    @apply text-emerald-300 bg-emerald-500/10 border border-emerald-400/15;
+  }
+
+  .status-warning {
+    @apply text-amber-300 bg-amber-500/10 border border-amber-400/15;
+  }
+
+  .status-critical {
+    @apply text-rose-300 bg-rose-500/10 border border-rose-400/15;
+  }
+
+  .status-unknown {
+    @apply text-slate-300 bg-slate-500/10 border border-slate-300/15;
+  }
+}

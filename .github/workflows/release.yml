@@ -1,0 +1,68 @@
+name: release-build
+
+on:
+  workflow_dispatch:
+  push:
+    tags:
+      - 'v*'
+
+jobs:
+  package:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Go
+        uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+
+      - name: Install templ
+        run: go install github.com/a-h/templ/cmd/templ@latest
+
+      - name: Install npm deps
+        run: npm install
+
+      - name: Generate assets and templates
+        run: |
+          /home/runner/go/bin/templ generate ./internal/views
+          npx tailwindcss -i ./static/src/input.css -o ./static/css/app.css --minify
+
+      - name: Test
+        run: go test ./...
+
+      - name: Package
+        run: make release VERSION=${GITHUB_REF_NAME:-dev}
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: dimonitorin-release-artifacts
+          path: dist/**
+
+      - name: Configure AWS credentials
+        if: ${{ secrets.DIMONITORIN_AWS_ACCESS_KEY_ID != '' && secrets.DIMONITORIN_AWS_SECRET_ACCESS_KEY != '' && secrets.DIMONITORIN_AWS_REGION != '' }}
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.DIMONITORIN_AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.DIMONITORIN_AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ secrets.DIMONITORIN_AWS_REGION }}
+
+      - name: Publish downloads origin
+        if: ${{ secrets.DIMONITORIN_DOWNLOADS_BUCKET != '' && secrets.DIMONITORIN_AWS_ACCESS_KEY_ID != '' && secrets.DIMONITORIN_AWS_SECRET_ACCESS_KEY != '' && secrets.DIMONITORIN_AWS_REGION != '' }}
+        run: |
+          aws s3 sync "dist/releases/${GITHUB_REF_NAME:-dev}/" "s3://${{ secrets.DIMONITORIN_DOWNLOADS_BUCKET }}/releases/${GITHUB_REF_NAME:-dev}/" --delete
+          aws s3 cp dist/latest.json "s3://${{ secrets.DIMONITORIN_DOWNLOADS_BUCKET }}/latest.json"
+
+      - name: Publish installer origin
+        if: ${{ secrets.DIMONITORIN_GET_BUCKET != '' && secrets.DIMONITORIN_AWS_ACCESS_KEY_ID != '' && secrets.DIMONITORIN_AWS_SECRET_ACCESS_KEY != '' && secrets.DIMONITORIN_AWS_REGION != '' }}
+        run: |
+          aws s3 cp dist/install.sh "s3://${{ secrets.DIMONITORIN_GET_BUCKET }}/install.sh"

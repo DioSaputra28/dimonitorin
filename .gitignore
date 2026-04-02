@@ -1,0 +1,28 @@
+dist/
+.local-run/
+node_modules/
+
+# local binaries
+dimonitorin
+*.exe
+*.test
+
+# sqlite and local runtime state
+*.db
+*.db-shm
+*.db-wal
+*.log
+*.pid
+
+# local backups and archives
+backups/
+*.tar.gz
+
+# coverage
+coverage.out
+*.coverprofile
+
+# editors / OS files
+.DS_Store
+.vscode/
+.idea/

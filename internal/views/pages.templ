@@ -1,0 +1,423 @@
+package views
+
+import (
+  "fmt"
+  "github.com/DioSaputra28/monitor-vps/internal/app"
+)
+
+templ Layout(title string, theme string, currentPath string, csrfToken string) {
+<!DOCTYPE html>
+<html lang="en" data-theme={ themeRoot(theme) }>
+  <head>
+    <meta charset="utf-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>{ title } · DiMonitorin</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com"/>
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="anonymous"/>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&family=Manrope:wght@600;700;800&display=swap" rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+    <link rel="stylesheet" href="/static/css/app.css"/>
+    <script src="/static/js/htmx.min.js"></script>
+    <script defer src="/static/js/echarts.min.js"></script>
+    <script defer src="/static/js/app.js"></script>
+  </head>
+  <body class={ shellBackground(theme) }>
+    <div class="min-h-screen bg-transparent">
+      <header class="sticky top-0 z-30 border-b border-outline-variant/10 bg-surface/80 backdrop-blur-xl">
+        <div class="mx-auto flex max-w-7xl items-center justify-between gap-4 px-4 py-4 sm:px-6 lg:px-8">
+          <div class="flex items-center gap-4">
+            <a href="/" class="flex items-center gap-3">
+              <div class="flex h-11 w-11 items-center justify-center rounded-2xl bg-primary text-surface">
+                <span class="material-symbols-outlined text-[22px]" style="font-variation-settings:'FILL' 1;">monitor_heart</span>
+              </div>
+              <div>
+                <p class="font-headline text-xl font-extrabold tracking-tight text-primary">DiMonitorin</p>
+                <p class={ "text-xs " + contentTone(theme) }>Lightweight VPS observability</p>
+              </div>
+            </a>
+            <nav class="hidden items-center gap-2 md:flex">
+              <a href="/" class={ navLink("/", currentPath) }>Dashboard</a>
+              <a href="/services" class={ navLink("/services", currentPath) }>Services</a>
+              <a href="/history" class={ navLink("/history", currentPath) }>History</a>
+              <a href="/settings" class={ navLink("/settings", currentPath) }>Settings</a>
+            </nav>
+          </div>
+          <div class="flex items-center gap-3">
+            <form method="post" action="/theme">
+              <input type="hidden" name="csrf_token" value={ csrfToken }/>
+              <input type="hidden" name="theme" value={ toggleTheme(theme) }/>
+              <button class="inline-flex items-center gap-2 rounded-full border border-outline-variant/20 bg-white/5 px-4 py-2 text-sm font-semibold text-on-surface transition hover:border-primary/30 hover:text-primary">
+                <span class="material-symbols-outlined text-base">contrast</span>
+                { themeButtonLabel(theme) }
+              </button>
+            </form>
+            <form method="post" action="/logout">
+              <input type="hidden" name="csrf_token" value={ csrfToken }/>
+              <button class="inline-flex items-center gap-2 rounded-full border border-outline-variant/20 bg-white/5 px-4 py-2 text-sm font-semibold text-on-surface transition hover:border-primary/30 hover:text-primary">
+                <span class="material-symbols-outlined text-base">logout</span>
+                Logout
+              </button>
+            </form>
+          </div>
+        </div>
+      </header>
+      <main class="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
+        { children... }
+      </main>
+    </div>
+  </body>
+</html>
+}
+
+templ LoginPage(data app.LoginPageData) {
+<!DOCTYPE html>
+<html lang="en" data-theme={ themeRoot(data.Theme) }>
+  <head>
+    <meta charset="utf-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>Login · DiMonitorin</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com"/>
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="anonymous"/>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Manrope:wght@600;700;800&display=swap" rel="stylesheet"/>
+    <link rel="stylesheet" href="/static/css/app.css"/>
+  </head>
+  <body class={ shellBackground(data.Theme) }>
+    <main class="mx-auto flex min-h-screen max-w-5xl items-center justify-center px-4 py-12">
+      <div class="grid w-full gap-6 lg:grid-cols-[1.1fr_0.9fr]">
+        <section class="card-panel flex flex-col justify-between rounded-[28px] p-8 lg:p-10">
+          <div>
+            <span class="inline-flex items-center gap-2 rounded-full bg-primary/10 px-4 py-1 text-xs font-bold uppercase tracking-[0.2em] text-primary">
+              <span class="h-2 w-2 rounded-full bg-primary"></span>
+              Production-grade lightweight host monitoring
+            </span>
+            <h1 class="mt-6 max-w-xl font-headline text-4xl font-black tracking-tight text-on-surface lg:text-5xl">Observe your server without dragging in a heavy control plane.</h1>
+            <p class={ "mt-4 max-w-xl text-base leading-7 " + contentTone(data.Theme) }>DiMonitorin is built for single-node clarity: core metrics, systemd health, recent events, and a modern dashboard with a tiny footprint.</p>
+          </div>
+          <div class="mt-10 grid gap-4 sm:grid-cols-3">
+            <div class="glass-panel rounded-2xl p-4">
+              <p class="text-xs font-bold uppercase tracking-[0.2em] text-primary">CPU / RAM</p>
+              <p class="mt-2 text-sm text-on-surface-variant">Real host metrics with clear thresholds.</p>
+            </div>
+            <div class="glass-panel rounded-2xl p-4">
+              <p class="text-xs font-bold uppercase tracking-[0.2em] text-primary">systemd</p>
+              <p class="mt-2 text-sm text-on-surface-variant">Track the services that matter most.</p>
+            </div>
+            <div class="glass-panel rounded-2xl p-4">
+              <p class="text-xs font-bold uppercase tracking-[0.2em] text-primary">SQLite</p>
+              <p class="mt-2 text-sm text-on-surface-variant">Simple persistence, local by default.</p>
+            </div>
+          </div>
+        </section>
+        <section class="card-panel rounded-[28px] p-8 lg:p-10">
+          <div class="mb-8">
+            <h2 class="font-headline text-2xl font-black tracking-tight text-on-surface">Admin Login</h2>
+            <p class={ "mt-2 text-sm " + contentTone(data.Theme) }>Sign in with the admin account created during <code>init</code>.</p>
+          </div>
+          if data.Error != "" {
+            <div class="mb-4 rounded-2xl border border-rose-400/20 bg-rose-500/10 px-4 py-3 text-sm text-rose-200">{ data.Error }</div>
+          }
+          <form method="post" action="/login" class="space-y-5">
+            <input type="hidden" name="csrf_token" value={ data.CSRFToken }/>
+            <label class="block space-y-2">
+              <span class="text-sm font-semibold text-on-surface">Username</span>
+              <input type="text" name="username" autocomplete="username" required class="w-full rounded-2xl border border-outline-variant/20 bg-surface-container px-4 py-3 text-on-surface outline-none ring-0 transition placeholder:text-on-surface-variant focus:border-primary"/>
+            </label>
+            <label class="block space-y-2">
+              <span class="text-sm font-semibold text-on-surface">Password</span>
+              <input type="password" name="password" autocomplete="current-password" required class="w-full rounded-2xl border border-outline-variant/20 bg-surface-container px-4 py-3 text-on-surface outline-none ring-0 transition placeholder:text-on-surface-variant focus:border-primary"/>
+            </label>
+            <button class="inline-flex w-full items-center justify-center rounded-2xl bg-primary px-4 py-3 font-semibold text-surface transition hover:brightness-110">Sign in</button>
+          </form>
+        </section>
+      </div>
+    </main>
+  </body>
+</html>
+}
+
+templ DashboardPage(data app.DashboardData) {
+  @Layout("Dashboard", data.Theme, "/", data.CSRFToken) {
+    <section class="space-y-6">
+      <div class="flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
+        <div>
+          <p class="text-sm font-semibold uppercase tracking-[0.2em] text-primary">Core Infrastructure</p>
+          <h1 class={ "mt-2 font-headline text-4xl font-black tracking-tight " + cardTone(data.Theme) }>{ data.Snapshot.Hostname }</h1>
+          <p class={ "mt-2 text-base " + contentTone(data.Theme) }>Single-node Linux observability with HTMX refresh and local persistence.</p>
+        </div>
+        <div class="flex flex-wrap items-center gap-3">
+          <div class={ statusClass(overallStatus(data.Snapshot)) }>
+            <span class="h-2 w-2 rounded-full bg-current"></span>
+            { statusText(overallStatus(data.Snapshot)) }
+          </div>
+          <div class="glass-panel rounded-full px-4 py-2 text-sm font-semibold text-on-surface-variant">Uptime: { fmtDuration(data.Snapshot.Uptime) }</div>
+          <div class="glass-panel rounded-full px-4 py-2 text-sm font-semibold text-on-surface-variant">Load: { fmtFloat(data.Snapshot.CPULoad1) }</div>
+        </div>
+      </div>
+      <div id="summary-shell" hx-get="/partials/summary" hx-trigger={ "load, every " + data.RefreshSummary } hx-swap="innerHTML">
+        @SummaryPartial(data.Snapshot)
+      </div>
+      <div class="grid gap-6 xl:grid-cols-[1.55fr_0.95fr]">
+        <div class="card-panel rounded-[28px] p-6">
+          <div class="flex flex-col gap-4 border-b border-outline-variant/10 pb-4 sm:flex-row sm:items-end sm:justify-between">
+            <div>
+              <h2 class={ "font-headline text-2xl font-black tracking-tight " + cardTone(data.Theme) }>Network Throughput</h2>
+              <p class={ "mt-1 text-sm " + contentTone(data.Theme) }>Primary interface { data.Snapshot.Network.Interface } with a lightweight ECharts line area.</p>
+            </div>
+            <div class="flex gap-2">
+              for _, rng := range data.ChartRanges {
+                <button class="rounded-full border border-outline-variant/20 px-3 py-1 text-xs font-bold uppercase tracking-[0.2em] text-on-surface-variant transition hover:border-primary/30 hover:text-primary" data-chart-range={ rng }>{ rng }</button>
+              }
+            </div>
+          </div>
+          <div id="network-chart" class="mt-6 h-80 w-full" data-chart-url={ "/chart/network?range=" + data.SelectedRange } data-chart-refresh={ data.RefreshChart }></div>
+          <p class={ "mt-4 text-xs uppercase tracking-[0.2em] " + contentTone(data.Theme) }>Simple hover tooltips only. No pan, zoom, or toolbox in v1.</p>
+        </div>
+        <div class="space-y-6">
+          <div id="process-shell" hx-get="/partials/processes" hx-trigger={ "load, every " + data.RefreshServices } hx-swap="innerHTML">
+            @ProcessesPartial(data.Snapshot)
+          </div>
+          <div id="events-shell" hx-get="/partials/events" hx-trigger={ "load, every " + data.RefreshEvents } hx-swap="innerHTML">
+            @EventsPartial(data.Events)
+          </div>
+        </div>
+      </div>
+    </section>
+  }
+}
+
+templ ServicesPage(data app.ServicesPageData) {
+  @Layout("Services", data.Theme, "/services", data.CSRFToken) {
+    <section class="space-y-6">
+      <div>
+        <p class="text-sm font-semibold uppercase tracking-[0.2em] text-primary">Tracked systemd units</p>
+        <h1 class={ "mt-2 font-headline text-4xl font-black tracking-tight " + cardTone(data.Theme) }>Services</h1>
+      </div>
+      <div id="services-shell" hx-get="/partials/services" hx-trigger="load, every 15s" hx-swap="innerHTML">
+        @ServicesPartial(data.Snapshot)
+      </div>
+      <div class="grid gap-6 lg:grid-cols-2">
+        <div id="events-shell" hx-get="/partials/events" hx-trigger="load, every 15s" hx-swap="innerHTML">
+          @EventsPartial(data.Events)
+        </div>
+        <div id="process-shell" hx-get="/partials/processes" hx-trigger="load, every 15s" hx-swap="innerHTML">
+          @ProcessesPartial(data.Snapshot)
+        </div>
+      </div>
+    </section>
+  }
+}
+
+templ HistoryPage(data app.HistoryPageData) {
+  @Layout("History", data.Theme, "/history", data.CSRFToken) {
+    <section class="space-y-6">
+      <div>
+        <p class="text-sm font-semibold uppercase tracking-[0.2em] text-primary">Metric history</p>
+        <h1 class={ "mt-2 font-headline text-4xl font-black tracking-tight " + cardTone(data.Theme) }>Recent History</h1>
+        <p class={ "mt-2 text-sm " + contentTone(data.Theme) }>Historical summaries stay local in SQLite and are pruned by age.</p>
+      </div>
+      <div class="grid gap-6 md:grid-cols-3">
+        <div class="card-panel rounded-[28px] p-6"><p class="text-xs uppercase tracking-[0.2em] text-on-surface-variant">CPU</p><p class="mt-3 text-4xl font-black text-on-surface">{ fmtPct(data.Snapshot.CPUPercent) }</p></div>
+        <div class="card-panel rounded-[28px] p-6"><p class="text-xs uppercase tracking-[0.2em] text-on-surface-variant">Memory</p><p class="mt-3 text-4xl font-black text-on-surface">{ fmtBytes(data.Snapshot.MemoryUsed) }</p></div>
+        <div class="card-panel rounded-[28px] p-6"><p class="text-xs uppercase tracking-[0.2em] text-on-surface-variant">Disk status</p><p class="mt-3 text-4xl font-black text-on-surface">{ statusText(data.Snapshot.DiskStatus) }</p></div>
+      </div>
+      <div class="card-panel rounded-[28px] p-6">
+        <div class="flex flex-wrap gap-2">
+          for _, rng := range data.Available {
+            <a href={ "/history?range=" + rng } class="rounded-full border border-outline-variant/20 px-3 py-1 text-xs font-bold uppercase tracking-[0.2em] text-on-surface-variant transition hover:border-primary/30 hover:text-primary">{ rng }</a>
+          }
+        </div>
+        <div id="network-chart" class="mt-6 h-96 w-full" data-chart-url={ "/chart/network?range=" + data.SelectedRange } data-chart-refresh="20s"></div>
+      </div>
+    </section>
+  }
+}
+
+templ SettingsPage(data app.SettingsPageData) {
+  @Layout("Settings", data.Theme, "/settings", data.CSRFToken) {
+    <section class="space-y-6">
+      <div>
+        <p class="text-sm font-semibold uppercase tracking-[0.2em] text-primary">Read-only system settings</p>
+        <h1 class={ "mt-2 font-headline text-4xl font-black tracking-tight " + cardTone(data.Theme) }>Settings</h1>
+        <p class={ "mt-2 text-sm " + contentTone(data.Theme) }>Configuration changes stay CLI-first in v1. This page is intentionally informational.</p>
+      </div>
+      <div class="grid gap-6 lg:grid-cols-[0.85fr_1.15fr]">
+        <div class="card-panel rounded-[28px] p-6">
+          <p class="text-xs uppercase tracking-[0.2em] text-on-surface-variant">Current host</p>
+          <h2 class="mt-3 font-headline text-2xl font-black text-on-surface">{ data.Hostname }</h2>
+          <p class="mt-4 text-sm text-on-surface-variant">The app is configured for a single monitored node and a portable app directory layout.</p>
+        </div>
+        <div class="card-panel overflow-hidden rounded-[28px]">
+          <table class="min-w-full divide-y divide-outline-variant/10 text-sm">
+            <thead class="bg-white/5 text-left text-xs uppercase tracking-[0.2em] text-on-surface-variant">
+              <tr><th class="px-6 py-4">Key</th><th class="px-6 py-4">Value</th></tr>
+            </thead>
+            <tbody class="divide-y divide-outline-variant/10">
+              for _, row := range sortedConfig(data.Config) {
+                <tr>
+                  <td class="px-6 py-4 font-mono text-primary">{ row[0] }</td>
+                  <td class="px-6 py-4 text-on-surface">{ row[1] }</td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+  }
+}
+
+templ SummaryPartial(snapshot app.HostSnapshot) {
+  <div class="grid gap-6 lg:grid-cols-4">
+    <div class="card-panel rounded-[28px] p-6">
+      <p class="text-xs font-bold uppercase tracking-[0.2em] text-on-surface-variant">CPU Usage</p>
+      <div class="mt-5 flex items-start justify-between gap-4">
+        <div>
+          <p class="font-headline text-4xl font-black tracking-tight text-on-surface">{ fmtPct(snapshot.CPUPercent) }</p>
+          <p class={ "mt-2 text-xs font-semibold uppercase tracking-[0.2em] " + statusClass(snapshot.CPUStatus) }>{ statusText(snapshot.CPUStatus) }</p>
+        </div>
+        <span class="material-symbols-outlined text-4xl text-primary/60">memory</span>
+      </div>
+      <div class="mt-6 h-2 overflow-hidden rounded-full bg-surface-container">
+        <div class="h-full rounded-full bg-primary" style={ widthStyle(snapshot.CPUPercent) }></div>
+      </div>
+    </div>
+    <div class="card-panel rounded-[28px] p-6">
+      <p class="text-xs font-bold uppercase tracking-[0.2em] text-on-surface-variant">Memory Usage</p>
+      <div class="mt-5 flex items-start justify-between gap-4">
+        <div>
+          <p class="font-headline text-4xl font-black tracking-tight text-on-surface">{ fmtBytes(snapshot.MemoryUsed) }</p>
+          <p class="mt-2 text-sm text-on-surface-variant">of { fmtBytes(snapshot.MemoryTotal) }</p>
+        </div>
+        <span class="material-symbols-outlined text-4xl text-secondary/60">database</span>
+      </div>
+      <div class="mt-6 h-2 overflow-hidden rounded-full bg-surface-container">
+        <div class="h-full rounded-full bg-secondary" style={ widthStyle(snapshot.MemoryUsedPct) }></div>
+      </div>
+    </div>
+    <div class="card-panel rounded-[28px] p-6">
+      <p class="text-xs font-bold uppercase tracking-[0.2em] text-on-surface-variant">Disk Health</p>
+      <div class="mt-5 flex items-start justify-between gap-4">
+        <div>
+          <p class="font-headline text-4xl font-black tracking-tight text-on-surface">{ statusText(snapshot.DiskStatus) }</p>
+          <p class="mt-2 text-sm text-on-surface-variant">{ len(snapshot.Disks) } mounted filesystems monitored</p>
+        </div>
+        <span class="material-symbols-outlined text-4xl text-tertiary/60">hard_drive</span>
+      </div>
+      <div class="mt-6 flex flex-wrap gap-2">
+        for _, disk := range snapshot.Disks {
+          <span class={ statusClass(disk.Status) }>{ disk.Mountpoint } · { fmtPct(disk.UsedPct) }</span>
+        }
+      </div>
+    </div>
+    <div class="card-panel rounded-[28px] p-6">
+      <p class="text-xs font-bold uppercase tracking-[0.2em] text-on-surface-variant">Network</p>
+      <div class="mt-5 grid gap-3">
+        <div>
+          <p class="text-sm font-semibold text-on-surface-variant">Download</p>
+          <p class="font-headline text-3xl font-black text-on-surface">{ fmtRate(snapshot.Network.RXBytesPerS) }</p>
+        </div>
+        <div>
+          <p class="text-sm font-semibold text-on-surface-variant">Upload</p>
+          <p class="font-headline text-3xl font-black text-on-surface">{ fmtRate(snapshot.Network.TXBytesPerS) }</p>
+        </div>
+      </div>
+    </div>
+  </div>
+}
+
+templ ServicesPartial(snapshot app.HostSnapshot) {
+  <section class="card-panel overflow-hidden rounded-[28px]">
+    <div class="flex items-center justify-between border-b border-outline-variant/10 px-6 py-5">
+      <div>
+        <h2 class="font-headline text-2xl font-black text-on-surface">Service Status</h2>
+        <p class="mt-1 text-sm text-on-surface-variant">systemd units chosen during setup or CLI config.</p>
+      </div>
+      <div class={ statusClass(snapshot.ServiceStatus) }>{ statusText(snapshot.ServiceStatus) }</div>
+    </div>
+    <div class="overflow-x-auto">
+      <table class="min-w-full divide-y divide-outline-variant/10">
+        <thead class="bg-white/5 text-left text-xs uppercase tracking-[0.2em] text-on-surface-variant">
+          <tr>
+            <th class="px-6 py-4">Service</th>
+            <th class="px-6 py-4">State</th>
+            <th class="px-6 py-4">Substate</th>
+            <th class="px-6 py-4">Last update</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-outline-variant/10">
+          if len(snapshot.Services) == 0 {
+            <tr><td colspan="4" class="px-6 py-8 text-sm text-on-surface-variant">No tracked services configured yet. Use <code>dimonitorin config set monitor.tracked_services nginx,postgresql</code>.</td></tr>
+          }
+          for _, service := range snapshot.Services {
+            <tr>
+              <td class="px-6 py-4 font-semibold text-on-surface">{ service.Name }</td>
+              <td class="px-6 py-4"><span class={ statusClass(service.Status) }>{ statusText(service.Status) }</span></td>
+              <td class="px-6 py-4 text-on-surface-variant">{ service.SubState }</td>
+              <td class="px-6 py-4 text-on-surface-variant">{ fmtTime(service.UpdatedAt) }</td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  </section>
+}
+
+templ ProcessesPartial(snapshot app.HostSnapshot) {
+  <section class="card-panel rounded-[28px] p-6">
+    <div class="mb-5 flex items-center justify-between">
+      <div>
+        <h2 class="font-headline text-2xl font-black text-on-surface">Top Processes</h2>
+        <p class="mt-1 text-sm text-on-surface-variant">Highest CPU consumers right now.</p>
+      </div>
+      <span class="material-symbols-outlined text-3xl text-primary/60">terminal</span>
+    </div>
+    <div class="space-y-3">
+      if len(snapshot.Processes) == 0 {
+        <div class="rounded-2xl border border-outline-variant/10 bg-white/5 px-4 py-5 text-sm text-on-surface-variant">Process sampling is currently unavailable.</div>
+      }
+      for _, proc := range snapshot.Processes {
+        <div class="rounded-2xl border border-outline-variant/10 bg-white/5 px-4 py-4">
+          <div class="flex items-start justify-between gap-3">
+            <div>
+              <p class="text-sm font-bold text-on-surface">{ proc.Command }</p>
+              <p class="mt-1 text-xs uppercase tracking-[0.2em] text-on-surface-variant">PID { fmt.Sprintf("%d", proc.PID) } · { proc.User }</p>
+            </div>
+            <div class="text-right">
+              <p class="font-mono text-sm font-bold text-on-surface">{ fmtPct(proc.CPU) }</p>
+              <p class="mt-1 text-xs text-on-surface-variant">{ processMemory(snapshot, proc) }</p>
+            </div>
+          </div>
+        </div>
+      }
+    </div>
+  </section>
+}
+
+templ EventsPartial(events []app.Event) {
+  <section class="card-panel rounded-[28px] p-6">
+    <div class="mb-5 flex items-center justify-between">
+      <div>
+        <h2 class="font-headline text-2xl font-black text-on-surface">Recent Events</h2>
+        <p class="mt-1 text-sm text-on-surface-variant">Threshold changes, collector issues, and service transitions.</p>
+      </div>
+      <span class="material-symbols-outlined text-3xl text-tertiary/60">event_available</span>
+    </div>
+    <div class="space-y-3">
+      if len(events) == 0 {
+        <div class="rounded-2xl border border-outline-variant/10 bg-white/5 px-4 py-5 text-sm text-on-surface-variant">No events recorded yet.</div>
+      }
+      for _, event := range events {
+        <div class="rounded-2xl border border-outline-variant/10 bg-white/5 px-4 py-4">
+          <div class="flex items-start justify-between gap-3">
+            <div>
+              <div class={ statusClass(event.Status) }>{ statusText(event.Status) }</div>
+              <p class="mt-3 text-sm font-bold text-on-surface">{ event.Title }</p>
+              <p class="mt-1 text-sm text-on-surface-variant">{ event.Details }</p>
+            </div>
+            <p class="whitespace-nowrap text-xs uppercase tracking-[0.2em] text-on-surface-variant">{ fmtTime(event.CreatedAt) }</p>
+          </div>
+        </div>
+      }
+    </div>
+  </section>
+}
