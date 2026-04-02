@@ -3,7 +3,7 @@ dist/
 node_modules/
 
 # local binaries
-dimonitorin
+/dimonitorin
 *.exe
 *.test
 
